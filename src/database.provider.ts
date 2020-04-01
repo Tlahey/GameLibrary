@@ -10,7 +10,7 @@ export const databaseProviders = [
       return DBConfiguration().DATABASE_HOST
     })(),
     port: DBConfiguration().DATABASE_PORT,
-    database: 'games',
+    database: 'GameLibrary',
     username: DBConfiguration().DATABASE_USERNAME,
     password: DBConfiguration().DATABASE_PASSWORD,
     entities: [

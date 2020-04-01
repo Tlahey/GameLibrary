@@ -38,15 +38,17 @@ export class ArgusService {
     }
 
     getSessionID (): Promise<string> {
-        var form = {
+
+        const that = this;
+        const form = {
             mode: "normal",
             login: ArgusConfig().ARGUS_ACCOUNT,
             password: ArgusConfig().ARGUS_PASSWORD,
             autologin: 1
         };
         
-        var formData = stringify(form);
-        var contentLength = formData.length;
+        const formData = stringify(form);
+        const contentLength = formData.length;
         
         return new Promise((resolve, reject) => {
             request({
@@ -62,7 +64,7 @@ export class ArgusService {
                     return reject(err);
                 }
                 const cookie = res.headers['set-cookie'];
-                this.logger.debug(`Récupération du cookie de session [${cookie.join('; ')}]`, "getSessionID")
+                that.logger.debug(`Récupération du cookie de session [${cookie.join('; ')}]`, "getSessionID")
                 resolve(cookie[0]);
               });
         });
