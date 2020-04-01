@@ -9,8 +9,7 @@ async function bootstrap() {
   app.enableCors({
     origin: ServiceConfig().CORS_ORIGIN,
     methods: ServiceConfig().CORS_METHODS,
-  })
-  console.log(DBConfiguration());
+  });
   await app.listen(ServiceConfig().SERVER_PORT);
 }
 bootstrap();

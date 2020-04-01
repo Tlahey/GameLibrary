@@ -5,10 +5,7 @@ import DBConfiguration from './config/database.config';
 export const databaseProviders = [
   TypeOrmModule.forRoot({
     type: 'mongodb',
-    host: (() => {
-      console.log(DBConfiguration());
-      return DBConfiguration().DATABASE_HOST
-    })(),
+    host: DBConfiguration().DATABASE_HOST,
     port: DBConfiguration().DATABASE_PORT,
     database: 'GameLibrary',
     username: DBConfiguration().DATABASE_USERNAME,
