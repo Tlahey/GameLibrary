@@ -1,10 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import ServiceConfig from './config/server.config';
-import DBConfiguration from './config/database.config';
-
 
 async function bootstrap() {
+  console.log("Version 0.0.1");
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: ServiceConfig().CORS_ORIGIN,
