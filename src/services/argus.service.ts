@@ -17,7 +17,7 @@ export class ArgusService {
         if(argusPrice) {
             return new ArgusModel(
                 new Date, 
-                parseInt(argusPrice[1]),
+                parseFloat(argusPrice[1].replace(",", ".")),
                 percentage[1]
             );
         }
