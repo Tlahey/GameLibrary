@@ -24,17 +24,33 @@ export class ArgusService {
         return null;
     }
 
-    async getGameThumbnail(url: string, cookie: string): Promise<string> {
+    async getGameInformations(url: string, cookie: string): Promise<any> {
         this.logger.debug(`Get game Thumbnail [${url}]`);
         const body = await this.getArgusBody(url, { headers: { Cookie: cookie } });
         const image = (/<img class="image" src="(.*)" alt="" \/>/gi.exec(body))
+        const releaseDate = (/<td class="label">Date de sortie : <\/td>           <td class="value">(.*?)<\/td>/gi.exec(body.replace(/\n|\t/g, ' ')));
+        const basePrice = (/<span class="price">(.*?)<\/span>/gi.exec(body));
 
-        if (image == undefined) {
-            return;
+        let data = {
+            thumbnail: null,
+            releaseDate: null,
+            basePrice: null
         }
 
-        const thumbnail = await this.getArgusBody(`${ArgusConfig().SITE_BASE_URL}${image[1]}`, { encoding: null, headers: { Cookie: cookie } });
-        return 'data:image/jpeg;base64,' + thumbnail.toString('base64');
+        if (image) {
+            const thumbnail = await this.getArgusBody(`${ArgusConfig().SITE_BASE_URL}${image[1]}`, { encoding: null, headers: { Cookie: cookie } });
+            data.thumbnail = 'data:image/jpeg;base64,' + thumbnail.toString('base64');
+        }
+
+        if (releaseDate) {
+            data.releaseDate = releaseDate[1];
+        }
+
+        if (basePrice) {
+            data.basePrice = basePrice[1].replace(/€|\s/g, "").replace(",", ".");
+        }
+
+        return data;
     }
 
     getSessionID (): Promise<string> {

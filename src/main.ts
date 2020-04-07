@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import ServiceConfig from './config/server.config';
 
 async function bootstrap() {
-  console.log("Version 0.0.1");
+  console.log("Version 0.0.2");
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: ServiceConfig().CORS_ORIGIN,

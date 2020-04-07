@@ -36,7 +36,7 @@ export class GamesController {
 
     @Post("/update-datas")
     public updateDatas() {
-        return this.gameService.updateGameInformations();
+        return this.gameService.updateGamesInformations();
     }
 
     @Get("/consoles")

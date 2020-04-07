@@ -27,7 +27,20 @@ export class GameService {
     }
 
     public async createGames(games: GameEntity[]) {
-        this.gameRepository.insert(games);
+        this.logger.debug(`Ajout d'un nouveau jeu ${JSON.stringify(games)}`, "createGames");
+        const result = await this.gameRepository.insert(games);
+        const ids = result.identifiers.map(i => i.id);
+        console.log(result);
+        // On récupère tous les games ajouté en bdd
+        const gameList: Array<GameEntity> = await this.gameRepository.findByIds(ids);
+        if (gameList.length > 0) {
+            new Promise(async () => {
+                const cookie = await this.argusService.getSessionID();
+                for (let i = 0, ii = gameList.length; i < ii; i++) {
+                    await this.processUpdateGameInformations(gameList[i], cookie);
+                }
+            })
+        }
         return true;
     }
 
@@ -42,7 +55,7 @@ export class GameService {
     }
 
     @Cron(argusConfig().CRON_GET_INFORMATIONS)
-    async updateGameInformations() {
+    async updateGamesInformations() {
         this.logger.debug('CRON update argus informations');
         const cookie = await this.argusService.getSessionID();
 
@@ -51,8 +64,19 @@ export class GameService {
         
         for (let i = 0, ii = gamesWithArgusUrl.length; i < ii; i++) {
             const game = gamesWithArgusUrl[i];
+            await this.processUpdateGameInformations(game, cookie);
+        }
+    }
+
+    async updateAGameInformation(game: GameEntity) {
+        const cookie = await this.argusService.getSessionID();
+        this.processUpdateGameInformations(game, cookie);
+    }
+
+    private async processUpdateGameInformations(game: GameEntity, cookie: string) {
+        
+        if (game.argusUrl) {
             const argusInformation = await this.argusService.getArgusInformations(game.argusUrl, cookie);
-            
             this.logger.debug(`Load game informations [${game.name}]`, "updateGameInformations");
             if (argusInformation) {
                 game.argus = game.argus || [];
@@ -60,16 +84,29 @@ export class GameService {
                     argus: game.argus.concat(argusInformation)
                 });
             }
+        }
 
-            // Load thumbnail
-            if (game.thumbnail == undefined) {
-                const base64 = await this.argusService.getGameThumbnail(game.argusUrl, cookie);
-                if (base64) {
-                    await this.updateGame(game.Id, {
-                        thumbnail: base64
-                    });
-                }
-            }
+        const gameInformations = await this.argusService.getGameInformations(game.argusUrl, cookie);
+        
+        // Add thumbnail
+        if (game.thumbnail == undefined && gameInformations.thumbnail) {
+            await this.updateGame(game.Id, {
+                thumbnail: gameInformations.thumbnail
+            });
+        }
+
+        // Add release date
+        if (game.releaseDate == undefined && gameInformations.releaseDate) {
+            await this.updateGame(game.Id, {
+                releaseDate: gameInformations.releaseDate
+            });
+        }
+
+        // Add base price
+        if (game.basePrice == undefined && gameInformations.basePrice) {
+            await this.updateGame(game.Id, {
+                basePrice: gameInformations.basePrice
+            });
         }
     }
   
